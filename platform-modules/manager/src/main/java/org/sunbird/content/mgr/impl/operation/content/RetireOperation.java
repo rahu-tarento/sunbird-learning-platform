@@ -43,6 +43,9 @@ public class RetireOperation extends BaseContentManager {
      * @return
      */
     public Response retire(String contentId) {
+        System.out.println(">>>>>>>>>>>> retire API called");
+        TelemetryManager.error("<<<<<<<<<< retire content id: " + contentId);
+
         Boolean isImageNodeExist = false;
         if (StringUtils.isBlank(contentId) || StringUtils.endsWithIgnoreCase(contentId, DEFAULT_CONTENT_IMAGE_OBJECT_SUFFIX))
             throw new ClientException(ContentErrorCodes.ERR_INVALID_CONTENT_ID.name(),
