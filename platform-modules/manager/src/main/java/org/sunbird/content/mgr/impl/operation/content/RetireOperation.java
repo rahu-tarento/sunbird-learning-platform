@@ -91,6 +91,7 @@ public class RetireOperation extends BaseContentManager {
                     RedisStoreUtil.delete(unitIds);
             }
             try {
+                System.out.println(">>>>>>>>>>> search index name: " + CompositeSearchConstants.COMPOSITE_SEARCH_INDEX);
                 ElasticSearchUtil.bulkDeleteDocumentById(CompositeSearchConstants.COMPOSITE_SEARCH_INDEX, CompositeSearchConstants.COMPOSITE_SEARCH_INDEX_TYPE, childrenIdentifiers);
             } catch (Exception e) {
                 TelemetryManager.error("Exception Occured While Removing Children's from ES | Exception is : " + e);

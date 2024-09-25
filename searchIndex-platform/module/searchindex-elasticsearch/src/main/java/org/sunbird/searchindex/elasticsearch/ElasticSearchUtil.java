@@ -695,13 +695,20 @@ public class ElasticSearchUtil {
 				int count = 0;
 				BulkRequest request = new BulkRequest();
 				for (String documentId : identifiers) {
+					System.out.println(">>>> in loop identifier: " + documentId);
 					count++;
 					request.add(new DeleteRequest(indexName, documentType, documentId));
+
 					if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == identifiers.size())) {
 						BulkResponse bulkResponse = getClient(indexName).bulk(request);
+
+						System.out.println(">>>>> BulkResponse: " + bulkResponse);
+
 						List<String> failedIds = Arrays.stream(bulkResponse.getItems()).filter(
 								itemResp -> !StringUtils.equals(itemResp.getResponse().getResult().getLowercase(),"deleted")
 						).map(r -> r.getResponse().getId()).collect(Collectors.toList());
+
+						System.out.println(">>>>> failed ids: " + failedIds);
 						if (CollectionUtils.isNotEmpty(failedIds))
 							TelemetryManager.log("Failed Id's While Deleting Elasticsearch Documents (Bulk Delete) : " + failedIds);
 						if (bulkResponse.hasFailures()) {
@@ -713,6 +720,7 @@ public class ElasticSearchUtil {
 				}
 			}
 		} else {
+			System.out.println("Index not found " + indexName);
 			throw new ServerException("ERR_BULK_DELETE_ES_DATA", "ES Index Not Found With Id : " + indexName);
 		}
 	}
