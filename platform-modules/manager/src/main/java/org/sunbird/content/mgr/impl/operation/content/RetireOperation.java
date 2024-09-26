@@ -56,8 +56,11 @@ public class RetireOperation extends BaseContentManager {
             return response;
 
         Node node = (Node) response.get(GraphDACParams.node.name());
+        System.out.println(">>>>>>>>> Node details: " + node);
         String mimeType = (String) node.getMetadata().get(ContentAPIParams.mimeType.name());
         String status = (String) node.getMetadata().get(ContentAPIParams.status.name());
+
+        System.out.println(">>>>>>>>> status: " + status);
 
         if (StringUtils.equalsIgnoreCase(ContentAPIParams.Retired.name(), status)) {
             throw new ClientException(ContentErrorCodes.ERR_CONTENT_RETIRE.name(),
@@ -72,24 +75,35 @@ public class RetireOperation extends BaseContentManager {
 
         List<String> identifiers = (isImageNodeExist) ? Arrays.asList(contentId, getImageId(contentId)) : Arrays.asList(contentId);
 
+        System.out.println(">>>>>>>>>>>>>>>>>> isCollWithFinalStatus: " + isCollWithFinalStatus);
+
         if (isCollWithFinalStatus) {
             List<String> shallowIds = getShallowCopy(node.getIdentifier());
+            System.out.println(">>>>>>>>>> shallowIds: " + shallowIds);
+
             if(CollectionUtils.isNotEmpty(shallowIds))
                 throw new ClientException(ContentErrorCodes.ERR_CONTENT_RETIRE.name(),
                         "Content With Identifier [" + contentId + "] Can Not Be Retired. It Has Been Adopted By Other Users.");
             RedisStoreUtil.delete(COLLECTION_CACHE_KEY_PREFIX + contentId);
             Response hierarchyResponse = getCollectionHierarchy(contentId);
+
+            System.out.println(">>>>>>>>>>> hierarchyResponse: " + hierarchyResponse);
+
             if (checkError(hierarchyResponse)) {
                 throw new ServerException(ContentErrorCodes.ERR_CONTENT_RETIRE.name(),
                         "Unable to fetch Hierarchy for Root Node: [" + contentId + "]");
             }
             Map<String, Object> rootHierarchy = (Map<String, Object>) hierarchyResponse.getResult().get("hierarchy");
+            System.out.println(">>>>>>>>>>>> rootHierarchy: " + rootHierarchy);
             List<Map<String, Object>> rootChildren = (List<Map<String, Object>>) rootHierarchy.get("children");
+            System.out.println(">>>>>>>>>> rootChildren: " + rootChildren);
             List<String> childrenIdentifiers = new ArrayList<String>();
             getChildrenIdentifiers(childrenIdentifiers, rootChildren);
 
             if (CollectionUtils.isNotEmpty(childrenIdentifiers)) {
                 String[] unitIds = childrenIdentifiers.stream().map(id -> (COLLECTION_CACHE_KEY_PREFIX + id)).collect(Collectors.toList()).toArray(new String[childrenIdentifiers.size()]);
+                System.out.println(">>>>>>>>>>>> unitIds: " + unitIds);
+
                 if (unitIds.length > 0)
                     RedisStoreUtil.delete(unitIds);
             }
