@@ -691,33 +691,41 @@ public class ElasticSearchUtil {
 	 */
 	public static void bulkDeleteDocumentById(String indexName, String documentType, List<String> identifiers) throws Exception {
 		if (isIndexExists(indexName)) {
-			if (null != identifiers && !identifiers.isEmpty()) {
-				int count = 0;
-				BulkRequest request = new BulkRequest();
-				for (String documentId : identifiers) {
-					System.out.println(">>>> in loop identifier: " + documentId);
-					count++;
-					request.add(new DeleteRequest(indexName, documentType, documentId));
+			try {
+				if (null != identifiers && !identifiers.isEmpty()) {
+					int count = 0;
+					BulkRequest request = new BulkRequest();
+					for (String documentId : identifiers) {
+						System.out.println(">>>> in loop indexName: " + indexName + " - documentType: " + documentType + " - documentId: " + documentId);
+						count++;
+						request.add(new DeleteRequest(indexName, documentType, documentId));
 
-					if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == identifiers.size())) {
-						BulkResponse bulkResponse = getClient(indexName).bulk(request);
+						System.out.println(">>>>>>>> request data: " + request.getDescription());
+						System.out.println(">>>>>>>> BATCH_SIZE: " + BATCH_SIZE + " - identifiers.size(): " + identifiers.size());
 
-						System.out.println(">>>>> BulkResponse: " + bulkResponse);
+						if (count % BATCH_SIZE == 0 || (count % BATCH_SIZE < BATCH_SIZE && count == identifiers.size())) {
+							BulkResponse bulkResponse = getClient(indexName).bulk(request);
 
-						List<String> failedIds = Arrays.stream(bulkResponse.getItems()).filter(
-								itemResp -> !StringUtils.equals(itemResp.getResponse().getResult().getLowercase(),"deleted")
-						).map(r -> r.getResponse().getId()).collect(Collectors.toList());
+							System.out.println(">>>>> BulkResponse: " + bulkResponse);
 
-						System.out.println(">>>>> failed ids: " + failedIds);
-						if (CollectionUtils.isNotEmpty(failedIds))
-							TelemetryManager.log("Failed Id's While Deleting Elasticsearch Documents (Bulk Delete) : " + failedIds);
-						if (bulkResponse.hasFailures()) {
-							//TODO: Implement Retry Mechanism
-							TelemetryManager
-									.log("Error Occured While Deleting Elasticsearch Documents in Bulk : " + bulkResponse.buildFailureMessage());
+							List<String> failedIds = Arrays.stream(bulkResponse.getItems()).filter(
+									itemResp -> !StringUtils.equals(itemResp.getResponse().getResult().getLowercase(), "deleted")
+							).map(r -> r.getResponse().getId()).collect(Collectors.toList());
+
+							System.out.println(">>>>> failed ids: " + failedIds);
+							if (CollectionUtils.isNotEmpty(failedIds))
+								TelemetryManager.log("Failed Id's While Deleting Elasticsearch Documents (Bulk Delete) : " + failedIds);
+							if (bulkResponse.hasFailures()) {
+								//TODO: Implement Retry Mechanism
+								TelemetryManager
+										.log("Error Occured While Deleting Elasticsearch Documents in Bulk : " + bulkResponse.buildFailureMessage());
+							}
 						}
 					}
 				}
+			} catch (Exception e) {
+				System.out.println("Exception in bulkDeleteDocumentById: ");
+				e.printStackTrace();
 			}
 		} else {
 			System.out.println("Index not found " + indexName);
