@@ -100,6 +100,8 @@ public class RetireOperation extends BaseContentManager {
             List<String> childrenIdentifiers = new ArrayList<String>();
             getChildrenIdentifiers(childrenIdentifiers, rootChildren);
 
+            System.out.println(">>>>>>>>>>>>>>> childrenIdentifiers: " + childrenIdentifiers);
+
             if (CollectionUtils.isNotEmpty(childrenIdentifiers)) {
                 String[] unitIds = childrenIdentifiers.stream().map(id -> (COLLECTION_CACHE_KEY_PREFIX + id)).collect(Collectors.toList()).toArray(new String[childrenIdentifiers.size()]);
                 System.out.println(">>>>>>>>>>>> unitIds: " + unitIds);
