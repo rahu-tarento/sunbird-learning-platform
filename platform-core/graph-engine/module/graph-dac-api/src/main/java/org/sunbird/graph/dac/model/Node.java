@@ -250,4 +250,18 @@ public class Node implements Serializable {
 			return true;
 		return false;
 	}
+
+	@Override
+	public String toString() {
+		return "Node{" +
+				"id=" + id +
+				", graphId='" + graphId + '\'' +
+				", identifier='" + identifier + '\'' +
+				", nodeType='" + nodeType + '\'' +
+				", objectType='" + objectType + '\'' +
+				", metadata=" + metadata +
+				", outRelations=" + outRelations +
+				", inRelations=" + inRelations +
+				'}';
+	}
 }

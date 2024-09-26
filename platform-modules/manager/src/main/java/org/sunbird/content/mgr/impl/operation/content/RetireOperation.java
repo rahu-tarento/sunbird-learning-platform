@@ -58,6 +58,7 @@ public class RetireOperation extends BaseContentManager {
         Node node = (Node) response.get(GraphDACParams.node.name());
         System.out.println(">>>>>>>>> Node details: " + node);
         String mimeType = (String) node.getMetadata().get(ContentAPIParams.mimeType.name());
+        System.out.println(">>>>>>> mime type of node data: " + mimeType);
         String status = (String) node.getMetadata().get(ContentAPIParams.status.name());
 
         System.out.println(">>>>>>>>> status: " + status);
